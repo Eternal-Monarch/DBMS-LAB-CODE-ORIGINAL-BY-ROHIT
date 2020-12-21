@@ -75,6 +75,31 @@ WHEN WEEKDAY_ERROR THEN
 RAISE_APPLICATION_ERROR (-20021, 'BOOK ISSUE NOT POSSIBLE' );
 END;
 INSERT INTO ISSUE_COPY (LIB_ISSUE_ID,BOOK_NO,MEMBER_ID,ISSUE_DATE)VALUES(7010,104,1,SYSDATE);
+--7
+create or replace trigger t5
+before insert on issue_copy
+for each row
+begin
+ if :new.issue_date > sysdate then
+  raise_application_error(-20008, 'issue date can not be in future');
+ end if;
+end;
+insert into issue_copy (book_no, member_id, issue_date) values (102, 5, '08/01/2020')
+--8
+
+
+create table countrow as (select count(BOOK_NO) as count from BOOKS123)
+create or replace trigger t6
+after insert or update or delete on BOOKS123
+for each row
+begin
+ if inserting then
+  update countrow set count = count + 1;
+ elsif deleting then 
+  update countrow set count = count - 1;
+ end if;
+end;
+SELECT * FROM BOOKS123
 
 
 
